@@ -7,7 +7,7 @@ import java.net.InetAddress;
 public class UDPClient {
     private DatagramSocket socket;
     private InetAddress address;
-    private int port;
+    private int port;   
 
     public void startConnection(String ip, int port) throws Exception {
         socket = new DatagramSocket();
@@ -27,5 +27,18 @@ public class UDPClient {
 
     public void stopConnection() {
         socket.close();
+    }
+
+    public static void main(String[] args) {
+        UDPClient client = new UDPClient();
+        int port = 6666; // Porta para se conectar ao servidor UDP
+        try {
+            client.startConnection("127.0.0.1", port); // IP do servidor UDP (neste exemplo, localhost)
+            String response = client.sendMessage("Hello, server!");
+            System.out.println("Server response: " + response);
+            client.stopConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

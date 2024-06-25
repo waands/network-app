@@ -23,12 +23,21 @@ public class UDPServer {
                 break;
             }
 
-            String response = "Server recebeu: " + received;
+            String response = "Server received: " + received;
             buf = response.getBytes();
             packet = new DatagramPacket(buf, buf.length, address, portNumber);
             socket.send(packet);
         }
         socket.close();
     }
-}
 
+    public static void main(String[] args) {
+        UDPServer server = new UDPServer();
+        int port = 6666; // Define a porta que o servidor UDP irá escutar
+        try {
+            server.start(port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
