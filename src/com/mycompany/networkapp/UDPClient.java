@@ -8,40 +8,34 @@ public class UDPClient {
     private DatagramSocket socket;
     private InetAddress address;
     private int port;
-    private byte[] buf;
 
     public void startConnection(String ip, int port) throws Exception {
-        socket = new DatagramSocket();
         address = InetAddress.getByName(ip);
         this.port = port;
+        socket = new DatagramSocket();
+        System.out.println("UDP Client started");
     }
 
-    public String sendMessage(String msg) throws Exception {
-        buf = msg.getBytes();
-        DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
+    public void sendMessage(String message) throws Exception {
+        byte[] buffer = message.getBytes();
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, port);
         socket.send(packet);
+        System.out.println("Sent message: " + message + " to " + address + ":" + port);
+    }
 
-        // Increase the buffer size to 256 bytes for receiving the message
-        buf = new byte[256];
-        packet = new DatagramPacket(buf, buf.length);
+    public String receiveMessage() throws Exception {
+        byte[] buffer = new byte[1024];
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
         socket.receive(packet);
-        return new String(packet.getData(), 0, packet.getLength());
+        String received = new String(packet.getData(), 0, packet.getLength());
+        System.out.println("Received response: " + received);
+        return received;
     }
 
-    public void stopConnection() {
-        socket.close();
-    }
-
-    public static void main(String[] args) {
-        UDPClient client = new UDPClient();
-        int port = 4445; // Porta para se conectar ao servidor UDP
-        try {
-            client.startConnection("127.0.0.1", port); // IP do servidor UDP (neste exemplo, localhost)
-            String response = client.sendMessage("Hello, server!");
-            System.out.println("Server response: " + response);
-            client.stopConnection();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void close() {
+        if (socket != null && !socket.isClosed()) {
+            socket.close();
+            System.out.println("UDP Client socket closed");
         }
     }
 }

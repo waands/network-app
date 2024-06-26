@@ -1,53 +1,52 @@
 package com.mycompany.networkapp.ui;
-
 import com.mycompany.networkapp.UDPServer;
-
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class UDPServerUI extends JFrame {
+public class UDPServerUI {
+    private JFrame frame;
     private JTextArea textArea;
     private UDPServer udpServer;
 
     public UDPServerUI() {
-        setTitle("UDP Server");
-        setSize(400, 300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        textArea = new JTextArea(10, 30);
-        add(new JScrollPane(textArea), BorderLayout.CENTER);
+        frame = new JFrame("UDP Server");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 300);
+        frame.setLayout(null);
 
-        JPanel buttonPanel = new JPanel();
         JButton startUdpServerButton = new JButton("Start UDP Server");
-        buttonPanel.add(startUdpServerButton);
-        add(buttonPanel, BorderLayout.SOUTH);
+        startUdpServerButton.setBounds(10, 10, 150, 25);
+        frame.add(startUdpServerButton);
 
-        udpServer = new UDPServer() {
-            @Override
-            public void onReceive(String message) {
-                SwingUtilities.invokeLater(() -> textArea.append("Received: " + message + "\n"));
-            }
-        };
+        textArea = new JTextArea();
+        textArea.setBounds(10, 50, 360, 200);
+        frame.add(textArea);
+
+        udpServer = new UDPServer();
 
         startUdpServerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                int port = 4445;
                 new Thread(() -> {
                     try {
-                        udpServer.start(4445);
-                        textArea.append("UDP Server started on port 4445\n");
-                    } catch (Exception ex) {
-                        textArea.append("Failed to start UDP Server\n");
-                        ex.printStackTrace();
+                        udpServer.start(port, message -> 
+                            SwingUtilities.invokeLater(() -> textArea.append("Received message: " + message + "\n"))
+                        );
+                        SwingUtilities.invokeLater(() -> textArea.append("UDP Server started on port " + port + "\n"));
+                    } catch (Exception exception) {
+                        SwingUtilities.invokeLater(() -> textArea.append("Failed to start UDP server\n"));
+                        exception.printStackTrace();
                     }
                 }).start();
             }
         });
+
+        frame.setVisible(true);
     }
 
     public static void main(String[] args) {
-        UDPServerUI udpServerUI = new UDPServerUI();
-        udpServerUI.setVisible(true);
+        new UDPServerUI();
     }
 }

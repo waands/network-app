@@ -1,77 +1,99 @@
 package com.mycompany.networkapp.ui;
-
 import com.mycompany.networkapp.UDPClient;
-
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class UDPClientUI extends JFrame {
-    private JPanel panel;
-    private JTextField textField;
-    private JTextArea textArea;
-    private JButton sendButton;
-    private JButton connectButton;
+public class UDPClientUI {
+    private JFrame frame;
     private JTextField ipTextField;
     private JTextField portTextField;
+    private JTextField messageTextField;
+    private JTextArea textArea;
     private UDPClient udpClient;
 
     public UDPClientUI() {
-        setTitle("UDP Client");
-        setSize(400, 300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        panel = new JPanel();
-        textField = new JTextField(20);
-        textArea = new JTextArea(10, 30);
-        sendButton = new JButton("Send");
-        connectButton = new JButton("Connect");
-        ipTextField = new JTextField("127.0.0.1", 10);
-        portTextField = new JTextField("4445", 5);
+        frame = new JFrame("UDP Client");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 300);
+        frame.setLayout(null);
 
-        panel.add(new JLabel("IP:"));
-        panel.add(ipTextField);
-        panel.add(new JLabel("Port:"));
-        panel.add(portTextField);
-        panel.add(connectButton);
-        panel.add(textField);
-        panel.add(sendButton);
-        panel.add(new JScrollPane(textArea));
-        add(panel);
+        JLabel ipLabel = new JLabel("IP Address:");
+        ipLabel.setBounds(10, 10, 100, 25);
+        frame.add(ipLabel);
+
+        ipTextField = new JTextField("127.0.0.1");
+        ipTextField.setBounds(120, 10, 150, 25);
+        frame.add(ipTextField);
+
+        JLabel portLabel = new JLabel("Port:");
+        portLabel.setBounds(10, 40, 100, 25);
+        frame.add(portLabel);
+
+        portTextField = new JTextField("4445");
+        portTextField.setBounds(120, 40, 150, 25);
+        frame.add(portTextField);
+
+        JLabel messageLabel = new JLabel("Message:");
+        messageLabel.setBounds(10, 70, 100, 25);
+        frame.add(messageLabel);
+
+        messageTextField = new JTextField();
+        messageTextField.setBounds(120, 70, 150, 25);
+        frame.add(messageTextField);
+
+        JButton connectButton = new JButton("Connect");
+        connectButton.setBounds(10, 100, 100, 25);
+        frame.add(connectButton);
+
+        JButton sendButton = new JButton("Send");
+        sendButton.setBounds(120, 100, 100, 25);
+        frame.add(sendButton);
+
+        textArea = new JTextArea();
+        textArea.setBounds(10, 130, 360, 120);
+        frame.add(textArea);
 
         udpClient = new UDPClient();
 
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    udpClient.startConnection(ipTextField.getText(), Integer.parseInt(portTextField.getText()));
-                    textArea.append("UDP connection established\n");
-                } catch (Exception exception) {
-                    textArea.append("Failed to establish UDP connection\n");
-                    exception.printStackTrace();
-                }
+                new Thread(() -> {
+                    try {
+                        String ip = ipTextField.getText();
+                        int port = Integer.parseInt(portTextField.getText());
+                        udpClient.startConnection(ip, port);
+                        SwingUtilities.invokeLater(() -> textArea.append("Connected to " + ip + " on port " + port + "\n"));
+                    } catch (Exception exception) {
+                        SwingUtilities.invokeLater(() -> textArea.append("Failed to connect\n"));
+                        exception.printStackTrace();
+                    }
+                }).start();
             }
         });
 
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String message = textField.getText();
-                if (udpClient != null) {
+                new Thread(() -> {
                     try {
-                        String response = udpClient.sendMessage(message);
-                        textArea.append("Server: " + response + "\n");
+                        String message = messageTextField.getText();
+                        udpClient.sendMessage(message);
+                        String response = udpClient.receiveMessage();
+                        SwingUtilities.invokeLater(() -> textArea.append("Received response: " + response + "\n"));
                     } catch (Exception exception) {
+                        SwingUtilities.invokeLater(() -> textArea.append("Failed to send message\n"));
                         exception.printStackTrace();
                     }
-                }
+                }).start();
             }
         });
+
+        frame.setVisible(true);
     }
 
     public static void main(String[] args) {
-        UDPClientUI udpClientUI = new UDPClientUI();
-        udpClientUI.setVisible(true);
+        new UDPClientUI();
     }
 }

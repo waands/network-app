@@ -2,49 +2,45 @@ package com.mycompany.networkapp;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 
 public class UDPServer {
     private DatagramSocket socket;
 
-    public void start(int port) throws Exception {
-        socket = new DatagramSocket(port);
+    public void start(int port, MessageReceivedCallback callback) {
+        new Thread(() -> {
+            try {
+                socket = new DatagramSocket(port);
+                System.out.println("UDP Server started on port " + port);
 
-        while (true) {
-            // Increase the buffer size to 256 bytes for receiving the message
-            byte[] buf = new byte[256];
-            DatagramPacket packet = new DatagramPacket(buf, buf.length);
-            socket.receive(packet);
+                byte[] buffer = new byte[1024];
 
-            InetAddress address = packet.getAddress();
-            int portNumber = packet.getPort();
-            String received = new String(packet.getData(), 0, packet.getLength());
+                while (true) {
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                    socket.receive(packet);
+                    String received = new String(packet.getData(), 0, packet.getLength());
+                    System.out.println("Received message: " + received);
 
-            onReceive(received);
+                    // Echo the message back to the client
+                    DatagramPacket responsePacket = new DatagramPacket(packet.getData(), packet.getLength(),
+                            packet.getAddress(), packet.getPort());
+                    socket.send(responsePacket);
+                    System.out.println("Sent response to " + packet.getAddress() + ":" + packet.getPort());
 
-            if (received.equals("end")) {
-                break;
+                    // Notify callback with received message
+                    callback.messageReceived(received);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (socket != null && !socket.isClosed()) {
+                    socket.close();
+                    System.out.println("UDP Server socket closed");
+                }
             }
-
-            String response = "Server received: " + received;
-            buf = response.getBytes();
-            packet = new DatagramPacket(buf, buf.length, address, portNumber);
-            socket.send(packet);
-        }
-        socket.close();
+        }).start();
     }
 
-    public void onReceive(String message) {
-        // Override this method in the UI class to handle the received message
-    }
-
-    public static void main(String[] args) {
-        UDPServer server = new UDPServer();
-        int port = 4445; // Define a porta que o servidor UDP irá escutar
-        try {
-            server.start(port);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public interface MessageReceivedCallback {
+        void messageReceived(String message);
     }
 }
