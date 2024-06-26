@@ -9,15 +9,18 @@ public class UDPServer {
 
     public void start(int port) throws Exception {
         socket = new DatagramSocket(port);
-        byte[] buf = new byte[256];
 
         while (true) {
+            // Increase the buffer size to 256 bytes for receiving the message
+            byte[] buf = new byte[256];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             socket.receive(packet);
 
             InetAddress address = packet.getAddress();
             int portNumber = packet.getPort();
             String received = new String(packet.getData(), 0, packet.getLength());
+
+            onReceive(received);
 
             if (received.equals("end")) {
                 break;
@@ -31,9 +34,13 @@ public class UDPServer {
         socket.close();
     }
 
+    public void onReceive(String message) {
+        // Override this method in the UI class to handle the received message
+    }
+
     public static void main(String[] args) {
         UDPServer server = new UDPServer();
-        int port = 6666; // Define a porta que o servidor UDP irá escutar
+        int port = 4445; // Define a porta que o servidor UDP irá escutar
         try {
             server.start(port);
         } catch (Exception e) {

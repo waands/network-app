@@ -37,7 +37,7 @@ public class Server {
                         out.println("bye");
                         break;
                     }
-                    out.println(inputLine);
+                    out.println("Server received: " + inputLine);
                 }
 
                 in.close();

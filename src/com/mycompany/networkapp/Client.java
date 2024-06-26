@@ -19,10 +19,13 @@ public class Client {
         return in.readLine();
     }
 
+    public BufferedReader getInput() {
+        return in;
+    }
+
     public void stopConnection() throws IOException {
         in.close();
         out.close();
         clientSocket.close();
     }
 }
-

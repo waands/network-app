@@ -38,7 +38,7 @@ java com.mycompany.networkapp.ui.ServerUI
 
 2. **Servidor UDP:**
 
-java com.mycompany.networkapp.UDPServer
+java com.mycompany.networkapp.ui.UDPServerUI
 
 
 ### Executando o Cliente
@@ -49,7 +49,7 @@ java com.mycompany.networkapp.ui.ClientUI
 
 2. **Cliente UDP:**
 
-java com.mycompany.networkapp.UDPClient
+java com.mycompany.networkapp.ui.UDPClientUI
 
 
 ## Interface do Usuário
