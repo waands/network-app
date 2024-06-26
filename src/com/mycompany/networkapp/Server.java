@@ -1,10 +1,15 @@
 package com.mycompany.networkapp;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Server {
     private ServerSocket serverSocket;
+    private MessageReceivedListener messageListener; // Listener para mensagens recebidas
 
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
@@ -17,7 +22,16 @@ public class Server {
         serverSocket.close();
     }
 
-    private static class ClientHandler extends Thread {
+    public void setMessageReceivedListener(MessageReceivedListener listener) {
+        this.messageListener = listener;
+    }
+
+    // Interface para ouvir mensagens recebidas
+    public interface MessageReceivedListener {
+        void messageReceived(String message);
+    }
+
+    private class ClientHandler extends Thread {
         private Socket clientSocket;
         private PrintWriter out;
         private BufferedReader in;
@@ -37,7 +51,10 @@ public class Server {
                         out.println("bye");
                         break;
                     }
-                    out.println("Server received: " + inputLine);
+                    // Chama o listener quando uma mensagem é recebida
+                    if (messageListener != null) {
+                        messageListener.messageReceived(inputLine);
+                    }
                 }
 
                 in.close();

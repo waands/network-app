@@ -12,20 +12,26 @@ public class Client {
         clientSocket = new Socket(ip, port);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        System.out.println("Connected to server on " + ip + ":" + port);
     }
 
     public String sendMessage(String msg) throws IOException {
         out.println(msg);
-        return in.readLine();
-    }
-
-    public BufferedReader getInput() {
-        return in;
+        System.out.println("Sent message: " + msg);
+        String response = in.readLine();
+        System.out.println("Received response: " + response);
+        return response;
     }
 
     public void stopConnection() throws IOException {
         in.close();
         out.close();
         clientSocket.close();
+        System.out.println("Connection closed");
+    }
+
+    // Método para acessar o InputStream do clientSocket
+    public InputStream getInputStream() throws IOException {
+        return clientSocket.getInputStream();
     }
 }

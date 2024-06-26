@@ -6,8 +6,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class ClientUI extends JFrame {
     private JPanel panel;
@@ -18,10 +19,11 @@ public class ClientUI extends JFrame {
     private JTextField ipTextField;
     private JTextField portTextField;
     private Client tcpClient;
+    private BufferedReader inFromServer; // Usado para leitura
     private Thread readThread;
 
     public ClientUI() {
-        setTitle("Client");
+        setTitle("TCP Client");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         panel = new JPanel();
@@ -51,7 +53,8 @@ public class ClientUI extends JFrame {
                     try {
                         tcpClient.startConnection(ipTextField.getText(), Integer.parseInt(portTextField.getText()));
                         SwingUtilities.invokeLater(() -> textArea.append("TCP connection established\n"));
-                        startReading();
+                        inFromServer = new BufferedReader(new InputStreamReader(tcpClient.getInputStream())); // Inicializa o BufferedReader para leitura
+                        startReading(); // Iniciar leitura das mensagens após conexão estabelecida
                     } catch (IOException ioException) {
                         SwingUtilities.invokeLater(() -> textArea.append("Failed to establish TCP connection\n"));
                         ioException.printStackTrace();
@@ -81,9 +84,8 @@ public class ClientUI extends JFrame {
     private void startReading() {
         readThread = new Thread(() -> {
             try {
-                BufferedReader in = tcpClient.getInput();
                 String message;
-                while ((message = in.readLine()) != null) {
+                while ((message = inFromServer.readLine()) != null) {
                     String finalMessage = message;
                     SwingUtilities.invokeLater(() -> textArea.append("Received: " + finalMessage + "\n"));
                 }

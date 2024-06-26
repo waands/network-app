@@ -13,7 +13,7 @@ public class ServerUI extends JFrame {
     private Server tcpServer;
 
     public ServerUI() {
-        setTitle("Server");
+        setTitle("TCP Server");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         textArea = new JTextArea(10, 30);
@@ -32,12 +32,19 @@ public class ServerUI extends JFrame {
                 new Thread(() -> {
                     try {
                         tcpServer.start(6666);
-                        textArea.append("TCP Server started on port 6666\n");
+                        SwingUtilities.invokeLater(() -> textArea.append("TCP Server started on port 6666\n"));
                     } catch (IOException ex) {
-                        textArea.append("Failed to start TCP Server\n");
+                        SwingUtilities.invokeLater(() -> textArea.append("Failed to start TCP Server\n"));
                         ex.printStackTrace();
                     }
                 }).start();
+            }
+        });
+
+        tcpServer.setMessageReceivedListener(new Server.MessageReceivedListener() {
+            @Override
+            public void messageReceived(String message) {
+                SwingUtilities.invokeLater(() -> textArea.append("Received from Client: " + message + "\n"));
             }
         });
     }
