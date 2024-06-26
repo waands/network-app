@@ -9,4 +9,3 @@ public class Main {
         new Thread(() -> ClientUI.main(args)).start();
     }
 }
- 
