@@ -34,4 +34,20 @@ public class Client {
     public InputStream getInputStream() throws IOException {
         return clientSocket.getInputStream();
     }
+
+    // Método para verificar se a conexão está estabelecida
+    public boolean isConnected() {
+        return clientSocket != null && clientSocket.isConnected();
+    }
+
+    // Método para fechar a conexão
+    public void closeConnection() {
+        try {
+            if (clientSocket != null && !clientSocket.isClosed()) {
+                clientSocket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
